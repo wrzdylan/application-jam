@@ -1,7 +1,25 @@
 # Jam Project
 
 ## TODO
+- [ ] Schéma UML
 - [ ] Quels sont les cas d'utilisations et benchmark sur les technologies, pour justifier les choix de la stack technique
+- [ ] API 
+- [ ] FRONT
+
+## Démarche
+Serveur local ne peut avoir qu'une version 7.4 de php. Afin d'utiliser une version plus récente et aussi faciliter le déploiement du produit, on va encapsuler l'environnement avec Docker.
+
+> Pour démarrer les containers : `docker-compose up --build` ou `docker-compose up -d`
+> Ouvrir terminal : `docker exec -it application-jam-db-1 bash`
+> Pour initialiser la base de données :
+```sh
+docker-compose exec web php bin/console doctrine:database:create
+docker-compose exec web php bin/console make:migration
+docker-compose exec web php bin/console doctrine:migration:migrate
+docker-compose exec web php bin/console doctrine:fixtures:load
+```
+
+Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
 
 
 ## Description
@@ -13,6 +31,7 @@ Projet e-commerce de confitures avec panier, espace d'administration et filtres 
 - EasyAdmin 
 - Stripe
 <br>
+
 ### Pré-requis :
 - Avoir PHP >=8.1 installé.
 - Avoir installé composer

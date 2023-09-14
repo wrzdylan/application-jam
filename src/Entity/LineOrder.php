@@ -6,6 +6,7 @@ use App\Repository\LineOrderRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LineOrderRepository::class)]
+#[ORM\Table(name: "shop_line_order")]
 class LineOrder
 {
     #[ORM\Id]
