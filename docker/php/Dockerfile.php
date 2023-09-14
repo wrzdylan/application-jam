@@ -5,8 +5,9 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     git \
     unzip \
-	libzip-dev \
-    && docker-php-ext-install pdo pdo_pgsql zip
+    libzip-dev \
+    && docker-php-ext-install pdo pdo_pgsql zip \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Installer Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -28,4 +29,4 @@ RUN composer dump-autoload --optimize
 RUN mkdir -p /var/www/html/migrations
 
 # Ajuster les permissions du répertoire (à ajuster en fonction de vos besoins)
-RUN chown -R www-data:www-data /var/www/html/migrations
+RUN chown -R www-data:www-data /var/www/html
