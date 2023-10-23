@@ -4,9 +4,11 @@ namespace App\Entity;
 
 use App\Repository\LineOrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: LineOrderRepository::class)]
 #[ORM\Table(name: "shop_line_order")]
+#[ApiResource]
 class LineOrder
 {
     #[ORM\Id]

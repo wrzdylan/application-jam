@@ -4,6 +4,7 @@
 - [ ] Schéma UML
 - [ ] Quels sont les cas d'utilisations et benchmark sur les technologies, pour justifier les choix de la stack technique
 - [ ] API 
+- [ ] Protéger les endpoints
 - [ ] FRONT
 
 ## Démarche
