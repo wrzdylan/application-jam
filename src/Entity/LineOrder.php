@@ -13,6 +13,7 @@ use ApiPlatform\Metadata\Patch;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LineOrderRepository::class)]
+#[ORM\Table(name: "shop_line_order")]
 #[ApiResource(
     operations : [
         new Get(
