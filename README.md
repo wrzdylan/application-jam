@@ -14,10 +14,10 @@ Serveur local ne peut avoir qu'une version 7.4 de php. Afin d'utiliser une versi
 > Ouvrir terminal : `docker exec -it application-jam-db-1 bash`
 > Pour initialiser la base de données :
 ```sh
-docker-compose exec web php bin/console doctrine:database:create
-docker-compose exec web php bin/console make:migration
-docker-compose exec web php bin/console doctrine:migration:migrate
-docker-compose exec web php bin/console doctrine:fixtures:load
+docker-compose exec php php bin/console doctrine:database:create
+docker-compose exec php php bin/console make:migration
+docker-compose exec php php bin/console doctrine:migration:migrate
+docker-compose exec php php bin/console doctrine:fixtures:load
 ```
 
 Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
