@@ -6,6 +6,9 @@
 - [ ] API 
 - [ ] Protéger les endpoints
 - [ ] FRONT
+   - Mettre en place le routeur
+   - Connecter le front vuejs à l'API
+   - Workflow fonctionnel (validation de la commande)
 
 ## Démarche
 
@@ -37,7 +40,8 @@ docker-compose exec php php bin/console doctrine:fixtures:load
 Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
 
 ### Initialisation du frontend
-- Création d'un service vue (mettre en place différent stage)          
+- Création d'un service vue (mettre en place différent stage)            
+- Pour y accéder : `docker-compose exec vue bash`                     
 - Dans le container vue-1, instancier un nouveau projet vue avec `vue create .`               
 - Pour run l'application : `npm run serve`                  
 

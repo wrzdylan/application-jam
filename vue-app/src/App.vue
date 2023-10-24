@@ -1,26 +1,35 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div>
+    <header-component></header-component>
+
+    <main class="container">
+      <div v-for="(messages, label) in flashes" :key="label">
+        <div v-for="message in messages" :key="message" :class="'alert alert-' + label" role="alert">
+          {{ message }}
+        </div>
+      </div>
+
+      <div class="row">
+        <slot></slot>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import HeaderComponent from './Header.vue'; 
 
 export default {
-  name: 'App',
   components: {
-    HelloWorld
+    HeaderComponent
+  },
+  data() {
+    return {
+      flashes: {}
+    };
   }
-}
+};
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
