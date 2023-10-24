@@ -10,7 +10,28 @@ use ApiPlatform\Metadata\ApiResource;
 
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ORM\Table(name: "shop_category")]
-#[ApiResource]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+        ),
+        new Get(
+        ),
+        new Post(
+            securityPostDenormalize: "is_granted('CREATE_CATEGORY', object)",
+        ),
+        new Put(
+            security: "is_granted('EDIT_CATEGORY', object)",
+        ),
+        new Delete(
+            security: "is_granted('DELETE_CATEGORY', object)",
+        ),
+        new Patch(
+            security: "is_granted('EDIT_CATEGORY', object)",
+        ),
+    ],
+    normalizationContext: ['groups' => ['category:read']],
+    denormalizationContext: ['groups' => ['category:write']],
+)]
 class Category
 {
     #[ORM\Id]
