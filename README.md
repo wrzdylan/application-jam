@@ -11,14 +11,26 @@
 Serveur local ne peut avoir qu'une version 7.4 de php. Afin d'utiliser une version plus récente et aussi faciliter le déploiement du produit, on va encapsuler l'environnement avec Docker.
 
 > Pour démarrer les containers : `docker-compose up --build` ou `docker-compose up -d`
+
 > Ouvrir terminal : `docker exec -it application-jam-db-1 bash`
+
 > Pour initialiser la base de données :
 ```sh
-docker-compose exec web php bin/console doctrine:database:create
-docker-compose exec web php bin/console make:migration
-docker-compose exec web php bin/console doctrine:migration:migrate
-docker-compose exec web php bin/console doctrine:fixtures:load
+docker-compose exec php php bin/console doctrine:database:create
+docker-compose exec php php bin/console make:migration
+docker-compose exec php php bin/console doctrine:migration:migrate
+docker-compose exec php php bin/console doctrine:fixtures:load
 ```
+
+>Pour se connecter à la db, une fois dans le container exécuter les commandes suivantes : 
+
+> su postgres
+
+> psql -U user -d shop
+
+> Pour display la db existante : \l
+
+> Pour display les tables : \dt
 
 Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
 
