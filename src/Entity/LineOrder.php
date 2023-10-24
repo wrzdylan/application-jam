@@ -2,13 +2,34 @@
 
 namespace App\Entity;
 
-use App\Repository\LineOrderRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Security\Voter\LineOrderVoter;
+use App\Repository\LineOrderRepository;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: LineOrderRepository::class)]
-#[ORM\Table(name: "shop_line_order")]
-#[ApiResource]
+#[ApiResource(
+    operations : [
+        new Get(
+        ),
+        new Post(
+            securityPostDenormalize: "is_granted('" . LineOrderVoter::CREATE . "', object)",
+        ),
+        new Put(
+            security: "is_granted('" . LineOrderVoter::EDIT . "', object)",
+        ),
+        new Patch(
+            security: "is_granted('" . LineOrderVoter::EDIT . "', object)",
+        ),
+    ],
+    normalizationContext: ['groups' => ['lineOrder:read']],
+    denormalizationContext: ['groups' => ['lineOrder:write']],
+)]
 class LineOrder
 {
     #[ORM\Id]
@@ -17,17 +38,21 @@ class LineOrder
     private $id;
 
     #[ORM\Column(type: 'integer')]
+    #[Groups(['lineOrder:read', 'lineOrder:write'])]
     private $quantity;
 
     #[ORM\Column(type: 'float')]
+    #[Groups(['lineOrder:read'])]
     private $subtotal;
 
     #[ORM\ManyToOne(targetEntity: Order::class, inversedBy: 'lineOrders')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['lineOrder:read', 'lineOrder:write'])]
     private $order_associated;
 
     #[ORM\ManyToOne(targetEntity: Product::class)]
     #[ORM\JoinColumn(nullable: false,onDelete:"CASCADE")]
+    #[Groups(['lineOrder:read', 'lineOrder:write'])]
     private $product;
 
     public function getId(): ?int
@@ -64,9 +89,11 @@ class LineOrder
         return $this->order_associated;
     }
 
+    #[Groups(['lineOrder:read', 'lineOrder:write'])]
     public function setOrderAssociated(?Order $order_associated): self
     {
         $this->order_associated = $order_associated;
+        $this->order_associated->setTotal($this->order_associated->getTotal()+$this->subtotal);
 
         return $this;
     }
@@ -79,6 +106,8 @@ class LineOrder
     public function setProduct(?Product $product): self
     {
         $this->product = $product;
+        $price = $product->getPrice();
+        $this->subtotal = $price * $this->quantity;
 
         return $this;
     }

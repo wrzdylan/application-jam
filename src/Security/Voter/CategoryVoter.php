@@ -10,10 +10,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class CategoryVoter extends Voter
 {
-    public const EDIT = 'EDIT_CATEGORY';
-    public const VIEW = 'VIEW_CATEGORY';
     public const CREATE = 'CREATE_CATEGORY';
     public const DELETE = 'DELETE_CATEGORY';
+    public const EDIT = 'EDIT_CATEGORY';
+    public const VIEW = 'VIEW_CATEGORY';
 
     private $logger;
 
