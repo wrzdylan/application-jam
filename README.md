@@ -43,7 +43,7 @@ Penser à changer le nom de la table user car c'est un mot réservé en postgres
 - Création d'un service vue (mettre en place différent stage)            
 - Pour y accéder : `docker-compose exec vue bash`                     
 - Dans le container vue-1, instancier un nouveau projet vue avec `vue create .`               
-- Pour run l'application : `npm run serve`                  
+- Pour run l'application : `yarn serve`                  
 
 ## Description
 Projet e-commerce de confitures avec panier, espace d'administration et filtres avancés.

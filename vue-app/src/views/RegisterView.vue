@@ -32,13 +32,13 @@
     },
     methods: {
       async submitForm() {
-        try {
+        // try {
 
-          const response = await axios.post('/register-endpoint', this.formData);
-          if(response.status === 200) {
-          }
-        } catch(error) {
-        }
+        //   const response = await axios.post('/register-endpoint', this.formData);
+        //   if(response.status === 200) {
+        //   }
+        // } catch(error) {
+        // }
       }
     }
   };

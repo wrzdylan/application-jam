@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-md navbar-light fixed-top bg-white border-bottom border-dark border-2">
     <div class="container-fluid mx-5">
-      <a class="navbar-brand" href="/">Shop</a>
+      <a class="navbar-brand" href="/">Retour au magasin</a>
       <div class="mx-5 d-flex justify-content-end align-items-center ">
         <div v-if="user">
           <p class="my-2 mx-3">{{ user.email }}</p>

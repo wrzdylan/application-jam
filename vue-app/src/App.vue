@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import HeaderComponent from './Header.vue'; 
+import HeaderComponent from './components/LayoutHeader.vue'; 
 
 export default {
   components: {
