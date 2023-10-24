@@ -1,4 +1,4 @@
 lexik_jwt_authentication:
     private_key_path: '%kernel.project_dir%/config/jwt/private.pem'
     public_key_path: '%kernel.project_dir%/config/jwt/public.pem'
-    pass_phrase: 'baptiste+dylan_<3' # Phrase secrète utilisée lors de la génération des clés
+    pass_phrase: '4791c39b07e226c0ce02ead2f01742059a4b71666905381ac556f45668eb30e0' # Phrase secrète utilisée lors de la génération des clés
