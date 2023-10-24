@@ -8,6 +8,8 @@
 - [ ] FRONT
 
 ## Démarche
+
+### Initialisation de la db
 Serveur local ne peut avoir qu'une version 7.4 de php. Afin d'utiliser une version plus récente et aussi faciliter le déploiement du produit, on va encapsuler l'environnement avec Docker.
 
 > Pour démarrer les containers : `docker-compose up --build` ou `docker-compose up -d`
@@ -22,6 +24,10 @@ docker-compose exec php php bin/console doctrine:fixtures:load
 
 Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
 
+### Initialisation du frontend
+- Création d'un service vue (mettre en place différent stage)          
+- Dans le container vue-1, instancier un nouveau projet vue avec `vue create .`               
+- Pour run l'application : `npm run serve`                  
 
 ## Description
 Projet e-commerce de confitures avec panier, espace d'administration et filtres avancés.
