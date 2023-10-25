@@ -11,6 +11,7 @@ services:
       - "8080:80"
     depends_on:
       - php
+      # - vuebuilder
 
   php:
     build:
@@ -30,5 +31,15 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  vue:
+    build:
+      context: .
+      dockerfile: docker/vue/Dockerfile.vue
+    volumes:
+      - .:/app
+    ports:
+      - "8081:8080"
+
 volumes:
   pgdata:
+  # vue-dist:
