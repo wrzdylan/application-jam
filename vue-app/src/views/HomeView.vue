@@ -2,19 +2,39 @@
   <v-container fluid>
 
     <!-- Sidebar avec Catégories -->
-    <v-navigation-drawer app fixed>
-      <v-list dense>
-        <v-list-item-group v-model="selectedCategories">
-          <v-list-item v-for="category in categories" :key="category.id" :value="category.id">
-            <v-list-item-content>
-              <v-simple-checkbox :value="selectedCategories.includes(category.id)" @input="toggleCategory(category.id, $event)"></v-simple-checkbox>
-              <v-list-item-title>{{ category.name }}</v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-        </v-list-item-group>
-      </v-list>
+    <v-navigation-drawer app fixed class="pr-5 pl-5">
+      <div class="mb-5"></div>
+      <v-subheader>Trier par</v-subheader>
+      <v-select
+        v-model="selectedSort"
+        :items="sortOptions"
+        item-title="text"
+        item-value="value"
+        label="Trier par"
+      ></v-select>
+
+      <v-divider class="mb-5"></v-divider>
+
+      <v-subheader>Catégories</v-subheader>
+      <v-checkbox 
+        v-for="category in categories"
+        :key="category.id"
+        :label="category.name"
+        @change="toggleCategory(category.id, $event)">
+      </v-checkbox>
+
+      <v-divider class="mb-5"></v-divider>
+
+      <v-subheader>Prix</v-subheader>
+      <div class="mb-10"></div>
+      <v-range-slider
+        v-model="priceRange"
+        :max="maxPrice"
+        :min="minPrice"
+        step="1"
+        thumb-label="always"
+      ></v-range-slider>
     </v-navigation-drawer>
-    
 
     <!-- Produits (filtrables) -->
     <v-main class="pl-0">
@@ -23,7 +43,7 @@
           <v-card>
             <v-img :src="'/uploads/' + product.image" aspect-ratio="1.7"></v-img>
             <v-card-title>{{ product.name }}</v-card-title>
-            <v-card-subtitle>{{ product.price }}</v-card-subtitle>
+            <v-card-subtitle>{{ parseFloat(product.price / 100).toFixed(2) }}€</v-card-subtitle>
             <!-- Formulaire d'action produit (par exemple, ajouter au panier) ici -->
           </v-card>
         </v-col>
@@ -42,15 +62,38 @@
       return {
         products: [], 
         categories: [], 
-        // filters: [
-        //   { label: 'Prix croissant', value: 'price_asc' },
-        //   { label: 'Prix décroissant', value: 'price_desc' },
-        //   { label: 'Alphabétique', value: 'name_asc' },
-        //   { label: 'Alphabétique Z->A', value: 'name_desc' }
-        // ],
-        // selectedFilter: 'price_asc',
-        selectedCategories: []
+        selectedSort: { text: 'Prix croissant', value: 'price_asc' },
+        sortOptions: [
+          { text: 'Prix croissant', value: 'price_asc' },
+          { text: 'Prix décroissant', value: 'price_desc' },
+          { text: 'Nom A->Z', value: 'name_asc' },
+          { text: 'Nom Z->A', value: 'name_desc' }
+        ],
+        selectedCategories: [],
+        priceRange: [],
+        minPrice: null,
+        maxPrice: null
       };
+    },
+    
+    async mounted() {
+      try {
+        this.categories = await this.fetchData("http://localhost:8080/api/categories");
+        this.products = await this.fetchData("http://localhost:8080/api/products");
+        
+        const priceRange = this.products.reduce((acc, product) => {
+          return {
+            min: Math.min(acc.min, product.price),
+            max: Math.max(acc.max, product.price)
+          };
+        }, { min: Infinity, max: 0 });
+        
+        this.minPrice = (Math.floor(priceRange.min / 10) * 10) / 100;
+        this.maxPrice = (Math.ceil(priceRange.max / 10) * 10) / 100;
+        this.priceRange = [this.minPrice, this.maxPrice];       
+      } catch (error) {
+        this.error = error.message;
+      }
     },
     methods: {
       async fetchData(url) {
@@ -70,47 +113,57 @@
           throw error;
         }
       },
-      toggleCategory(categoryId, value) {
-        if (value) {
+      toggleCategory(categoryId, event) {
+        const index = this.selectedCategories.indexOf(categoryId);
+
+        if (event && index === -1) {
           this.selectedCategories.push(categoryId);
         } else {
-          const index = this.selectedCategories.indexOf(categoryId);
-          if (index !== -1) {
             this.selectedCategories.splice(index, 1);
-          }
         }
       },
       extractCategoryId(categoryUrl) {
         const segments = categoryUrl.split('/');
         return segments[segments.length - 1];
-      }
-    },
-    async mounted() {
-      try {
-        this.categories = await this.fetchData("http://localhost:8080/api/categories");
-        this.products = await this.fetchData("http://localhost:8080/api/products");
-      } catch (error) {
-        this.error = error.message;
+      },
+      sortProducts(products) {
+        switch (this.selectedSort) {
+          case 'price_asc':
+            return products.slice().sort((a, b) => a.price - b.price);
+          case 'price_desc':
+            return products.slice().sort((a, b) => b.price - a.price);
+          case 'name_asc':
+            return products.slice().sort((a, b) => a.name.localeCompare(b.name));
+          case 'name_desc':
+            return products.slice().sort((a, b) => b.name.localeCompare(a.name));
+          default:
+            return products;  // retourner la liste non triée si aucun tri n'est sélectionné
+        }
       }
     },
     computed: {
-      currency(value) {
-        return new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'EUR'
-        }).format(value / 100);
-      },
       filteredProducts() {
-        if (this.selectedCategories.length === 0) {
-          return this.products;
-        }
-        return this.products.filter(product =>
-          // Vérifier si au moins une des catégories du produit est sélectionnée
-          product.categories.some(categoryUrl =>
-            this.selectedCategories.includes(this.extractCategoryId(categoryUrl))
-          )
-        );
-      }
+        let products = this.products.filter(product => {
+          const productPrice = product.price / 100;
+          if (productPrice < this.priceRange[0] || productPrice > this.priceRange[1]) {
+            return false;
+          }
+          
+          if (this.selectedCategories.length === 0) {
+            return true;
+          }
+
+          const productCategoryIds = product.categories.map(categoryUrl =>
+            this.extractCategoryId(categoryUrl)
+          );
+          return productCategoryIds.some(categoryId =>
+            this.selectedCategories.includes(Number(categoryId))
+          );
+        });
+
+        products = this.sortProducts(products);
+        return products;
+      },
     }
   }
   </script>
