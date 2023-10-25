@@ -1,4 +1,4 @@
-<!-- Search.vue -->
+<!-- Search.vue
 <template>
     <div class="row mt-4">
         <div class="col-12 mt-4" id="content">
@@ -46,4 +46,4 @@ export default {
 </script>
 
 <style scoped>
-</style>
+</style> -->
