@@ -6,17 +6,18 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class CategoryVoter extends Voter
+class ProductVoter extends Voter
 {
-    public const CREATE = 'CREATE_CATEGORY';
-    public const DELETE = 'DELETE_CATEGORY';
-    public const EDIT = 'EDIT_CATEGORY';
-    public const VIEW = 'VIEW_CATEGORY';
+
+    public const CREATE = 'CREATE_PRODUCT';
+    public const DELETE = 'DELETE_PRODUCT';
+    public const EDIT = 'EDIT_PRODUCT';
+    public const VIEW = 'VIEW_PRODUCT';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
         return in_array($attribute, [self::CREATE, self::DELETE, self::EDIT, self::VIEW])
-            && $subject instanceof \App\Entity\Category;
+            && $subject instanceof \App\Entity\Product;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool

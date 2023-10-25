@@ -8,13 +8,14 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class OrderVoter extends Voter
 {
+
     public const CREATE = 'CREATE_ORDER';
     public const EDIT = 'EDIT_ORDER';
     public const VIEW = 'VIEW_ORDER';
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::VIEW, self::EDIT, self::CREATE])
+        return in_array($attribute, [self::CREATE, self::EDIT, self::VIEW])
             && $subject instanceof \App\Entity\Order;
     }
 
@@ -36,18 +37,18 @@ class OrderVoter extends Voter
         $orderOwner = $subject->getOwner();
 
         switch ($attribute) {
-            case self::VIEW:
-                // Verify if user is order's owner, or belongs to owner role
-                return $user === $orderOwner || in_array('ROLE_OWNER', $user->getRoles());
-            case self::EDIT:
-                // Order's owner and/or an owner role is allowed to edit the Order
-                return $user === $orderOwner || in_array('ROLE_OWNER', $user->getRoles());
             case self::CREATE:
-                // Everyone is allowed to create an Order
+                // Everyone is allowed to create an Order.
                 return true;
+            case self::EDIT:
+                // Order's owner and/or an OWNER role is allowed to edit the Order.
+                return $user === $orderOwner || in_array('ROLE_OWNER', $user->getRoles());
+            case self::VIEW:
+                // Verify if user is order's owner, or belongs to OWNER role.
+                return $user === $orderOwner || in_array('ROLE_OWNER', $user->getRoles());
         }
 
-        return false;  // Return false for any other unknown attributes
+        return false;  // Return false for any other unknown attributes.
     }
 
 }
