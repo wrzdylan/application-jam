@@ -1,15 +1,5 @@
 # Jam Project
 
-## TODO
-- [ ] Schéma UML
-- [ ] Quels sont les cas d'utilisations et benchmark sur les technologies, pour justifier les choix de la stack technique
-- [ ] API 
-- [ ] Protéger les endpoints
-- [ ] FRONT
-   - Mettre en place le routeur
-   - Connecter le front vuejs à l'API
-   - Workflow fonctionnel (validation de la commande)
-
 ## Démarche
 
 ### Initialisation de la db

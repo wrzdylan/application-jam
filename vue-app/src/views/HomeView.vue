@@ -1,6 +1,10 @@
 <template>
   <v-container fluid>
 
+    <v-alert class="mb-10" v-if="error" type="error" dismissible @dismissed="error = null">
+      {{ error }}
+    </v-alert>
+
     <!-- Sidebar avec Catégories -->
     <v-navigation-drawer app fixed class="pr-5 pl-5">
       <div class="mb-5"></div>
@@ -36,6 +40,50 @@
       ></v-range-slider>
     </v-navigation-drawer>
 
+    <!-- Bouton pour ouvrir la modale -->
+    <v-btn @click="dialog = true">Voir le panier</v-btn>
+
+    <!-- Modale pour afficher le panier -->
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card>
+        <v-card-title class="d-flex justify-space-between">
+          Mon panier
+
+          <v-btn icon @click="dialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+        </v-card-title>
+
+        <v-card-text>
+          <v-list>
+            <v-list-item-group>
+              <v-list-item v-for="item in cart" :key="item.id">
+        
+                <v-list-item-content class="d-flex justify-space-between align-center">
+                  <div>
+                    <v-list-item-title>{{ item.name }}</v-list-item-title>
+                    <v-list-item-subtitle>
+                      {{ item.quantity }} x {{ parseFloat(item.price / 100).toFixed(2) }}€ = {{ itemTotalPrice(item).toFixed(2) }}€
+                    </v-list-item-subtitle>
+                  </div>
+        
+                  <v-btn icon @click="decrementQuantity(item)">
+                    <v-icon>mdi-minus</v-icon>
+                  </v-btn>
+                </v-list-item-content>
+        
+              </v-list-item>
+            </v-list-item-group>
+          </v-list>
+        
+          <v-divider class="my-4"></v-divider>
+        
+          Prix total du panier : {{ cartTotalPrice() }}€
+        </v-card-text>
+        
+      </v-card>
+    </v-dialog>
+
     <!-- Produits (filtrables) -->
     <v-main class="pl-0">
       <v-row>
@@ -44,12 +92,32 @@
             <v-img :src="'/uploads/' + product.image" aspect-ratio="1.7"></v-img>
             <v-card-title>{{ product.name }}</v-card-title>
             <v-card-subtitle>{{ parseFloat(product.price / 100).toFixed(2) }}€</v-card-subtitle>
-            <!-- Formulaire d'action produit (par exemple, ajouter au panier) ici -->
+            <v-card-actions>
+              <v-btn @click="addToCart(product)">Ajouter au panier</v-btn>
+            </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
     </v-main>
 
+    <v-snackbar
+      v-model="alertVisible"
+      :timeout="3000"
+      color="success"
+      :bottom="true"
+      :width="'100%'"
+    >
+      <div class="d-flex align-center justify-space-between w-100">
+        <span>{{ alertMessage }}</span>
+        <v-btn
+          color="white"
+          text
+          @click="alertVisible = false"
+        >
+          Fermer
+        </v-btn>
+      </div>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -72,10 +140,14 @@
         selectedCategories: [],
         priceRange: [],
         minPrice: null,
-        maxPrice: null
+        maxPrice: null,
+        cart: [],
+        dialog: false,
+        alertVisible: false,
+        alertMessage: '',
+        error: null,
       };
     },
-    
     async mounted() {
       try {
         this.categories = await this.fetchData("http://localhost:8080/api/categories");
@@ -99,17 +171,25 @@
       async fetchData(url) {
         try {
           const cachedData = localStorage.getItem(url);
+          const cachedTimestamp = localStorage.getItem(url + '-timestamp');
 
-          if (cachedData) {
+          const currentTime = Date.now();
+          const maxCacheAge = 60 * 60 * 1000;
+
+          if (cachedData && cachedTimestamp && (currentTime - cachedTimestamp <= maxCacheAge)) {
             return JSON.parse(cachedData);
           }
 
           const response = await axios.get(url);
-          const data = response.data['hydra:member'];  // Accéder aux données avec la clé 'hydra:member'
+          const data = response.data['hydra:member']; 
+
           localStorage.setItem(url, JSON.stringify(data));
+          localStorage.setItem(url + '-timestamp', currentTime.toString());
+
           return data;
         } catch (error) {
           console.error("Erreur de récupération des données :", error);
+          this.error = "Une erreur est survenue lors de la récupération des données.";
           throw error;
         }
       },
@@ -139,7 +219,36 @@
           default:
             return products;  // retourner la liste non triée si aucun tri n'est sélectionné
         }
-      }
+      },
+      addToCart(product) {
+        const productInCart = this.cart.find(item => item.id === product.id);
+        if (productInCart) {
+          productInCart.quantity += 1;
+        } else {
+          this.cart.push({ ...product, quantity: 1 });
+        }
+
+        this.alertMessage = `${product.name} a été ajouté au panier`;
+        this.alertVisible = true;
+      },
+      itemTotalPrice(item) {
+        return (item.price / 100) * item.quantity;
+      },
+      cartTotalPrice() {
+        return this.cart.reduce((total, item) => total + this.itemTotalPrice(item), 0).toFixed(2);
+      },
+      decrementQuantity(item) {
+        const productInCart = this.cart.find(cartItem => cartItem.id === item.id);
+
+        if (productInCart) {
+          productInCart.quantity -= 1;
+
+          if (productInCart.quantity === 0) {
+            const index = this.cart.indexOf(productInCart);
+            this.cart.splice(index, 1);
+          }
+        }
+      },
     },
     computed: {
       filteredProducts() {
