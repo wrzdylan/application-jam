@@ -19,9 +19,9 @@ security:
             pattern: ^/api$
             security: false
 
-        public_api:
-            pattern: ^/api/(get/categories|get/products)
-            stateless: true
+        api_public:
+            pattern: ^/api/(products|categories|users)
+            methods: [GET, GET, POST]
             security: false
 
         api:

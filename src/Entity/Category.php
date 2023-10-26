@@ -59,8 +59,6 @@ class Category
     #[Groups(['category:read', 'category:write'])]
     private $description;
 
-
-
     #[ORM\Column(type: 'string', length: 255)]
     private $slug;
 
@@ -102,8 +100,6 @@ class Category
 
         return $this;
     }
-
-
 
     public function __toString() {
         return $this->name;

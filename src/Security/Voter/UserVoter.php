@@ -23,6 +23,11 @@ class UserVoter extends Voter
     {
         $user = $token->getUser();
 
+        // Guests may create an account
+        if ($attribute === self::CREATE && !$user instanceof UserInterface) {
+            return true;
+        }
+
         if (!$user instanceof UserInterface) {
             return false;  // Guests have no rights.
         }

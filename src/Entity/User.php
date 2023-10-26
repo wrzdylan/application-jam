@@ -17,21 +17,28 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "shop_user")]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[ORM\Table(name: 'shop_user')]
+#[UniqueEntity(fields: ['email'], message: 'Il y a déjà un compte avec ce mail.')]
 #[ApiResource(
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
     operations : [
         new GetCollection(
-            security: "is_granted('" . UserVoter::VIEW . "', object)",
+            // security: "is_granted('" . UserVoter::VIEW . "', object)",
+            normalizationContext: ['groups' => ['user:read', 'user:orders']],
         ),
         new Get(
             security: "is_granted('" . UserVoter::VIEW . "', object)",
+            normalizationContext: ['groups' => ['user:read', 'user:orders']],
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . UserVoter::CREATE . "', object)",
+            denormalizationContext: ['groups' => ['user:create']],
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Put(
             security: "is_granted('" . UserVoter::EDIT . "', object)",
@@ -49,21 +56,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Groups(['user:read', 'user:write', 'user:create'])]
     private ?string $email = null;
 
     #[ORM\Column]
+    #[Groups(['user:read', 'user:write'])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Groups(['user:write', 'user:create'])]
     private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Order::class)]
+    #[Groups(['user:orders'])]
     private Collection $orders;
 
     public function __construct()
@@ -142,7 +154,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     /**
-     * @return Collection<int, Order>
+     * @return Collection|Order[]
      */
     public function getOrders(): Collection
     {
@@ -151,6 +163,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addOrder(Order $order): static
     {
+        // Si l'utilisateur n'a pas encore été persisté, on ne fait rien
+        if ($this->id === null) {
+            return $this;
+        }
+
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
             $order->setOwner($this);
@@ -161,6 +178,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeOrder(Order $order): static
     {
+        // Si l'utilisateur n'a pas encore été persisté, on ne fait rien
+        if ($this->id === null) {
+            return $this;
+        }
+
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
             if ($order->getOwner() === $this) {

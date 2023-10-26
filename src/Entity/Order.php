@@ -58,7 +58,7 @@ class Order
     private $status;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(name: 'owner_id', referencedColumnName: 'id')]
     #[Groups(['order:read', 'order:write'])]
     private ?User $owner = null;
 
