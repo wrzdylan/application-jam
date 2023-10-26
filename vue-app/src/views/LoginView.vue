@@ -1,31 +1,45 @@
 <template>
-    <div class="row col-6">
-      <div v-if="error">{{ errorMessage }}</div>
-      
-      <h1 class="my-5">Login</h1>
-      <form @submit.prevent="login">
-        <!-- Email input -->
-        <div class="form-outline mb-4">
-          <input type="text" class="form-control" v-model="username">
-          <label class="form-label" for="username">E-mail</label>
-        </div>
-        
-        <!-- Password input -->
-        <div class="form-outline mb-4">
-          <input type="password" v-model="password" class="form-control">
-          <label class="form-label" for="password">Mot de passe</label>
-        </div>
-  
-        <!-- Submit button -->
-        <button type="submit" class="btn btn-primary btn-block mb-4">Se connecter</button>
-  
-        <!-- Register buttons -->
-        <div class="text-center">
-          <p>Vous n'avez pas de compte ? <router-link to="/register">Inscription</router-link></p>
-        </div>
-      </form>
-    </div>
-  </template>
+  <v-container class="fill-height" fluid>
+    <v-row align="center" justify="center">
+      <v-col cols="12" sm="8" md="4">
+        <v-card class="elevation-12">
+          <v-toolbar color="primary" dark flat>
+            <v-toolbar-title>Se connecter</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
+            <v-form @submit.prevent="login">
+              <v-text-field
+                label="E-mail"
+                name="email"
+                v-model="username"
+                prepend-icon="mdi-email"
+                type="email"
+                required
+              ></v-text-field>
+              <v-text-field
+                label="Mot de passe"
+                name="password"
+                v-model="password"
+                prepend-icon="mdi-lock"
+                type="password"
+                required
+              ></v-text-field>
+            </v-form>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" block @click="login">Se connecter</v-btn>
+          </v-card-actions>
+          <v-card-actions class="justify-center">
+            <v-btn text small @click="$router.push('/register')">Vous n'avez pas de compte ? Inscription</v-btn>
+          </v-card-actions>
+          <v-alert v-if="error" type="error" dense outlined>
+            {{ errorMessage }}
+          </v-alert>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
   
 <script>
 import axios from 'axios';
@@ -33,10 +47,10 @@ import axios from 'axios';
 export default {
   data() {
     return {
-        username: '',
-        password: '',
-        errorMessage: null,
-        error: false
+      username: '',
+      password: '',
+      errorMessage: null,
+      error: false
     };
   },
   methods: {

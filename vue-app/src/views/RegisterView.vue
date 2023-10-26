@@ -1,23 +1,27 @@
 <template>
-  <v-container>
-    <v-row>
-      <v-col cols="12" md="6">
-        <v-card>
-          <v-card-title>Inscription</v-card-title>
+  <v-container class="fill-height" fluid>
+    <v-row align="center" justify="center">
+      <v-col cols="12" sm="8" md="4">
+        <v-card class="elevation-12">
+          <v-toolbar color="primary" dark flat>
+            <v-toolbar-title>Inscription</v-toolbar-title>
+          </v-toolbar>
           <v-card-text>
             <v-form ref="form" @submit.prevent="submitForm">
               <v-text-field
                 v-model="formData.email"
-                label="Email"
+                label="E-mail"
                 type="email"
-                :rules="emailRules"
+                :rules="formData.emailRules"
+                prepend-icon="mdi-email"
                 required
               ></v-text-field>
               <v-text-field
                 v-model="formData.plainPassword"
-                label="Password"
+                label="Mot de passe"
                 type="password"
                 :rules="[v => !!v || 'Le mot de passe est requis']"
+                prepend-icon="mdi-lock"
                 required
               ></v-text-field>
               <v-checkbox
@@ -26,15 +30,11 @@
                 :rules="[v => !!v || 'Vous devez accepter les termes']"
                 required
               ></v-checkbox>
-              <v-btn
-                type="submit"
-                color="primary"
-                :disabled="!$refs.form?.validate()"
-              >
-                Valider
-              </v-btn>
             </v-form>
           </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" block @click="submitForm">Valider</v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
     </v-row>
@@ -61,7 +61,7 @@ export default {
     async submitForm() {
       if (this.$refs.form.validate()) {
         try {
-          const response = await axios.post('http://localhost:8000/api/users', {
+          const response = await axios.post('http://localhost:8080/api/users', {
             email: this.formData.email,
             // roles: ['string'],  // Assurez-vous de remplacer 'string' par la valeur appropriée
             password: this.formData.plainPassword,
@@ -79,3 +79,6 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+</style>
