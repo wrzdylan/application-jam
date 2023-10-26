@@ -1,46 +1,66 @@
 <template>
-    <div>
-      <h1>Inscription</h1>
-      <form @submit.prevent="submitForm">
-        <div class="form-group">
-          <label for="email">Email</label>
-          <input type="email" v-model="formData.email" id="email" class="form-control">
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" v-model="formData.plainPassword" id="password" class="form-control">
-        </div>
-        <div class="form-check">
-          <input type="checkbox" v-model="formData.agreeTerms" id="agreeTerms" class="form-check-input">
-          <label for="agreeTerms" class="form-check-label">J'accepte les termes.</label>
-        </div>
-        <button type="submit" class="btn btn-primary">Valider</button>
-      </form>
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        formData: {
-          email: '',
-          plainPassword: '',
-          agreeTerms: false
-        }
-      };
-    },
-    methods: {
-      async submitForm() {
-        // try {
+  <v-container>
+    <v-row>
+      <v-col cols="12" md="6">
+        <v-card>
+          <v-card-title>Inscription</v-card-title>
+          <v-card-text>
+            <v-form ref="form" @submit.prevent="submitForm">
+              <v-text-field
+                v-model="formData.email"
+                label="Email"
+                type="email"
+                :rules="emailRules"
+                required
+              ></v-text-field>
+              <v-text-field
+                v-model="formData.plainPassword"
+                label="Password"
+                type="password"
+                :rules="[v => !!v || 'Password is required']"
+                required
+              ></v-text-field>
+              <v-checkbox
+                v-model="formData.agreeTerms"
+                label="J'accepte les termes."
+                :rules="[v => !!v || 'You must agree to continue']"
+                required
+              ></v-checkbox>
+              <v-btn
+                type="submit"
+                color="primary"
+                :disabled="!$refs.form?.validate()"
+              >
+                Valider
+              </v-btn>
+            </v-form>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
+</template>
 
-        //   const response = await axios.post('/register-endpoint', this.formData);
-        //   if(response.status === 200) {
-        //   }
-        // } catch(error) {
-        // }
+<script>
+export default {
+  data() {
+    return {
+      formData: {
+        email: '',
+        plainPassword: '',
+        agreeTerms: false,
+        emailRules: [ 
+          v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail doit être valide'
+        ]
+      }
+    };
+  },
+  methods: {
+    submitForm() {
+      if (this.$refs.form.validate()) {
+        // Your form submission logic here
       }
     }
-  };
-  </script>
-  
+  }
+}
+</script>
