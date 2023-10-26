@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -64,6 +65,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Order::class)]
+    #[Groups(['user:read'])]
     private Collection $orders;
 
     public function __construct()
@@ -151,6 +153,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function addOrder(Order $order): static
     {
+        // If user hasn't been persisted, keep the status quo
+        if ($this->id === null) {
+            return $this;
+        }
+
         if (!$this->orders->contains($order)) {
             $this->orders->add($order);
             $order->setOwner($this);
@@ -161,6 +168,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function removeOrder(Order $order): static
     {
+        // If user hasn't been persisted, keep the status quo
+        if ($this->id === null) {
+            return $this;
+        }
+
         if ($this->orders->removeElement($order)) {
             // set the owning side to null (unless already changed)
             if ($order->getOwner() === $this) {
