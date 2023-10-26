@@ -19,9 +19,19 @@ security:
             pattern: ^/api$
             security: false
 
-        public_api:
-            pattern: ^/api/(get/categories|get/products|post/users)
-            stateless: true
+        user_public_api:
+            methods: [ POST ]
+            pattern: ^/api/users
+            security: false
+
+        categories_public_api:
+            methods: [ GET ]
+            pattern: ^/api/categories
+            security: false
+
+        products_public_api:
+            methods: [ GET ]
+            pattern: ^/api/products
             security: false
 
         api:
@@ -70,9 +80,9 @@ security:
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/get/categories, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/get/products, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api/post/users, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/categories, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
+        - { path: ^/api/products, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [GET] }
+        - { path: ^/api/users, roles: IS_AUTHENTICATED_ANONYMOUSLY, methods: [POST] }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
     role_hierarchy:
