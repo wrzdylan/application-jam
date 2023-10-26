@@ -5,10 +5,13 @@ namespace App\DataFixtures;
 use App\Entity\Product;
 use App\Entity\Category;
 use App\Entity\User;
+use App\Entity\Order;
+use App\Entity\LineOrder;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+
 
 class AppFixtures extends Fixture
 {
@@ -89,19 +92,49 @@ class AppFixtures extends Fixture
             $categoriesInstance[] = $category;
         }
 
+        $productsInstance = [];
+
         foreach ($products as $key => $product) {
             $productInstance = new Product();
             $productInstance->setName($key);
             $productInstance->setPrice(floatval($product[0])*100);
             foreach ($product[1] as $category) {
-                $productInstance->addCategory($categoriesInstance[$category]); 
+                $productInstance->addCategory($categoriesInstance[$category]);
             }
 
             $image = $slugger->slug($productInstance->getName());
             $productInstance->setImage(strtolower($image) . '.jpeg');
 
+            $productsInstance[$key] = $productInstance;
 
             $manager->persist($productInstance);
+        }
+
+
+        for ($i = 1; $i <= 4; $i++) {
+            $user = new User();
+            $user->setEmail("user_{$i}@user.com");
+            $user->setPassword(
+                $this->userPasswordHasherInterface->hashPassword(
+                    $user, "ilove_user{$i}jam"
+                )
+            );
+            $user->setRoles(["ROLE_USER"]);
+
+            $order = new Order();
+            $order->setOwner($user);
+
+            $product = $productInstance[rand(0, 5)];
+
+            $lineOrder = new LineOrder();
+            $lineOrder->setProduct($product);
+            $lineOrder->setQuantity(rand(1, 8));
+            $lineOrder->setSubtotal($lineOrder->getQuantity() * $product->getPrice());
+            $lineOrder->setOrderAssociated($order);
+
+            $manager->persist($lineOrder);
+            $manager->persist($user);
+            $manager->persist($order);
         }
 
         $user = new User();
@@ -112,7 +145,19 @@ class AppFixtures extends Fixture
             )
         );
         $user->setRoles(["ROLE_ADMIN"]);
+
+        $user_2 = new User();
+        $user_2->setEmail("owner@owner.com");
+        $user_2->setPassword(
+            $this->userPasswordHasherInterface->hashPassword(
+                $user, "iloveownerjam"
+            )
+        );
+        $user_2->setRoles(["ROLE_OWNER"]);
+
         $manager->persist($user);
+        $manager->persist($user_2);
+
         $manager->flush();
     }
 }
