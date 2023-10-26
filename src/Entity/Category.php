@@ -24,8 +24,10 @@ use ApiPlatform\Core\Annotation\ApiSubresource;
 #[ApiResource(
     operations: [
         new GetCollection(
+            security: "is_granted('" . CategoryVoter::VIEW . "', object)",
         ),
         new Get(
+            security: "is_granted('" . CategoryVoter::VIEW . "', object)",
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . CategoryVoter::CREATE . "', object)",

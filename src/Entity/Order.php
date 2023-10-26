@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations : [
         new Get(
+            security: "is_granted('" . OrderVoter::VIEW . "', object)",
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . OrderVoter::CREATE . "', object)",

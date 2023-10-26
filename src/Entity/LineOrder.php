@@ -17,6 +17,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations : [
         new Get(
+            security: "is_granted('" . LineOrderVoter::VIEW . "', object)",
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . LineOrderVoter::CREATE . "', object)",

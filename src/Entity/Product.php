@@ -22,8 +22,10 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ApiResource(
     operations : [
         new GetCollection(
+            security: "is_granted('" . ProductVoter::VIEW . "', object)",
         ),
         new Get(
+            security: "is_granted('" . ProductVoter::VIEW . "', object)",
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . ProductVoter::CREATE . "', object)",
