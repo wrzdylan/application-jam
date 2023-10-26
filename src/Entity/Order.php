@@ -2,37 +2,72 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use App\Security\Voter\OrderVoter;
 use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: "shop_order")]
-#[ApiResource]
+#[ApiResource(
+    operations : [
+        new Get(
+        ),
+        new Post(
+            securityPostDenormalize: "is_granted('" . OrderVoter::CREATE . "', object)",
+        ),
+        new Put(
+            security: "is_granted('" . OrderVoter::EDIT . "', object)",
+        ),
+        new Patch(
+            security: "is_granted('" . OrderVoter::EDIT . "', object)",
+        ),
+    ],
+    normalizationContext: ['groups' => ['order:read']],
+    denormalizationContext: ['groups' => ['order:write']],
+)]
 class Order
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['order:read', 'order:write'])]
     private $id;
 
     #[ORM\Column(type: 'datetime')]
     private $datetime;
 
     #[ORM\Column(type: 'float')]
+    #[Groups(['order:read'])]
     private $total;
 
     #[ORM\OneToMany(mappedBy: 'order_associated', targetEntity: LineOrder::class, cascade: ["persist"])]
+    #[Groups(['order:read'])]
     private $lineOrders;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['order:read'])]
     private $status;
+
+    #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['order:read', 'order:write'])]
+    private ?User $owner = null;
 
     public function __construct()
     {
         $this->lineOrders = new ArrayCollection();
+        $this->datetime = new \DateTime();
+        $this->total = 0;
+        $this->status = "pending";
     }
 
     public function getId(): ?int
@@ -64,7 +99,7 @@ class Order
         return $this;
     }
 
-  
+
     /**
      * @return Collection|LineOrder[]
      */
@@ -110,5 +145,17 @@ class Order
     public function __toString()
     {
         return $this->id;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
     }
 }

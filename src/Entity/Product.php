@@ -2,37 +2,73 @@
 
 namespace App\Entity;
 
+use Doctrine\ORM\Mapping as ORM;
+use App\Security\Voter\ProductVoter;
 use App\Repository\ProductRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Patch;
+use Symfony\Component\Serializer\Annotation\Groups;
+
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[ORM\Table(name: "shop_product")]
-#[ApiResource]
+#[ApiResource(
+    operations : [
+        new GetCollection(
+        ),
+        new Get(
+        ),
+        new Post(
+            securityPostDenormalize: "is_granted('" . ProductVoter::CREATE . "', object)",
+        ),
+        new Put(
+            security: "is_granted('" . ProductVoter::EDIT . "', object)",
+        ),
+        new Delete(
+            security: "is_granted('" . ProductVoter::DELETE . "', object)",
+        ),
+        new Patch(
+            security: "is_granted('" . ProductVoter::EDIT . "', object)",
+        ),
+    ],
+    normalizationContext: ['groups' => ['product:read']],
+    denormalizationContext: ['groups' => ['product:write']],
+)]
 class Product
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[Groups(['product:read', 'product:write'])]
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Groups(['product:read', 'product:write'])]
     private $name;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['product:read', 'product:write'])]
     private $description;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Groups(['product:read', 'product:write'])]
     private $image;
 
     #[ORM\Column(type: 'integer')]
+    #[Groups(['product:read', 'product:write'])]
     private $price;
 
     private int $quantity=0;
 
     #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'products')]
+    #[Groups(['product:read', 'product:write'])]
     private $categories;
 
     public function __construct()
@@ -130,7 +166,7 @@ class Product
     {
         $this->categories->removeElement($category);
 
-        
+
         return $this;
     }
 

@@ -1,0 +1,5 @@
+lexik_jwt_authentication:
+    private_key_path: '%kernel.project_dir%/config/jwt/private.pem'
+    public_key_path: '%kernel.project_dir%/config/jwt/public.pem'
+    pass_phrase: 'baptiste+dylan_<3' # Phrase secrète utilisée lors de la génération des clés
+    token_ttl: 3600 # Durée de validité du token en secondes
