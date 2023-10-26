@@ -1,12 +1,5 @@
 # Jam Project
 
-## TODO
-- [ ] Schéma UML
-- [ ] Quels sont les cas d'utilisations et benchmark sur les technologies, pour justifier les choix de la stack technique
-- [ ] API 
-- [ ] Protéger les endpoints
-- [ ] FRONT
-
 ## Démarche
 
 ### Initialisation de la db
@@ -37,9 +30,10 @@ docker-compose exec php php bin/console doctrine:fixtures:load
 Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
 
 ### Initialisation du frontend
-- Création d'un service vue (mettre en place différent stage)          
+- Création d'un service vue (mettre en place différent stage)            
+- Pour y accéder : `docker-compose exec vue bash`                     
 - Dans le container vue-1, instancier un nouveau projet vue avec `vue create .`               
-- Pour run l'application : `npm run serve`                  
+- Pour run l'application : `yarn serve`                  
 
 ## Description
 Projet e-commerce de confitures avec panier, espace d'administration et filtres avancés.
