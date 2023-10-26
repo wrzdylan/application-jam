@@ -122,158 +122,160 @@
 </template>
 
   
-  <script>
-  import axios from 'axios';
+<script>
+import axios from '@/axios.js';
 
-  export default {
-    data() {
-      return {
-        products: [], 
-        categories: [], 
-        selectedSort: { text: 'Prix croissant', value: 'price_asc' },
-        sortOptions: [
-          { text: 'Prix croissant', value: 'price_asc' },
-          { text: 'Prix décroissant', value: 'price_desc' },
-          { text: 'Nom A->Z', value: 'name_asc' },
-          { text: 'Nom Z->A', value: 'name_desc' }
-        ],
-        selectedCategories: [],
-        priceRange: [],
-        minPrice: null,
-        maxPrice: null,
-        cart: [],
-        dialog: false,
-        alertVisible: false,
-        alertMessage: '',
-        error: null,
-      };
-    },
-    async mounted() {
+export default {
+  data() {
+    return {
+      products: [], 
+      categories: [], 
+      selectedSort: { text: 'Prix croissant', value: 'price_asc' },
+      sortOptions: [
+        { text: 'Prix croissant', value: 'price_asc' },
+        { text: 'Prix décroissant', value: 'price_desc' },
+        { text: 'Nom A->Z', value: 'name_asc' },
+        { text: 'Nom Z->A', value: 'name_desc' }
+      ],
+      selectedCategories: [],
+      priceRange: [],
+      minPrice: null,
+      maxPrice: null,
+      cart: [],
+      dialog: false,
+      alertVisible: false,
+      alertMessage: '',
+      error: null,
+    };
+  },
+  async mounted() {
+    try {
+      this.categories = await this.fetchData("http://localhost:8080/api/categories");
+      this.products = await this.fetchData("http://localhost:8080/api/products");
+      
+      const priceRange = this.products.reduce((acc, product) => {
+        return {
+          min: Math.min(acc.min, product.price),
+          max: Math.max(acc.max, product.price)
+        };
+      }, { min: Infinity, max: 0 });
+      
+      this.minPrice = (Math.floor(priceRange.min / 10) * 10) / 100;
+      this.maxPrice = (Math.ceil(priceRange.max / 10) * 10) / 100;
+      this.priceRange = [this.minPrice, this.maxPrice];       
+    } catch (error) {
+      this.error = error.message;
+    }
+  },
+  methods: {
+    async fetchData(url) {
       try {
-        this.categories = await this.fetchData("http://localhost:8080/api/categories");
-        this.products = await this.fetchData("http://localhost:8080/api/products");
-        
-        const priceRange = this.products.reduce((acc, product) => {
-          return {
-            min: Math.min(acc.min, product.price),
-            max: Math.max(acc.max, product.price)
-          };
-        }, { min: Infinity, max: 0 });
-        
-        this.minPrice = (Math.floor(priceRange.min / 10) * 10) / 100;
-        this.maxPrice = (Math.ceil(priceRange.max / 10) * 10) / 100;
-        this.priceRange = [this.minPrice, this.maxPrice];       
+        const cachedData = localStorage.getItem(url);
+        const cachedTimestamp = localStorage.getItem(url + '-timestamp');
+
+        const currentTime = Date.now();
+        const maxCacheAge = 60 * 60 * 1000;
+
+        if (cachedData && cachedTimestamp && (currentTime - cachedTimestamp <= maxCacheAge)) {
+          return JSON.parse(cachedData);
+        }
+
+        const response = await axios.get(url);
+        const data = response.data['hydra:member']; 
+
+        localStorage.setItem(url, JSON.stringify(data));
+        localStorage.setItem(url + '-timestamp', currentTime.toString());
+
+        return data;
       } catch (error) {
-        this.error = error.message;
+        console.error("Erreur de récupération des données :", error);
+        this.error = "Une erreur est survenue lors de la récupération des données.";
+        throw error;
       }
     },
-    methods: {
-      async fetchData(url) {
-        try {
-          const cachedData = localStorage.getItem(url);
-          const cachedTimestamp = localStorage.getItem(url + '-timestamp');
+    toggleCategory(categoryId, event) {
+      console.log(categoryId)
+      const index = this.selectedCategories.indexOf(categoryId);
 
-          const currentTime = Date.now();
-          const maxCacheAge = 60 * 60 * 1000;
-
-          if (cachedData && cachedTimestamp && (currentTime - cachedTimestamp <= maxCacheAge)) {
-            return JSON.parse(cachedData);
-          }
-
-          const response = await axios.get(url);
-          const data = response.data['hydra:member']; 
-
-          localStorage.setItem(url, JSON.stringify(data));
-          localStorage.setItem(url + '-timestamp', currentTime.toString());
-
-          return data;
-        } catch (error) {
-          console.error("Erreur de récupération des données :", error);
-          this.error = "Une erreur est survenue lors de la récupération des données.";
-          throw error;
-        }
-      },
-      toggleCategory(categoryId, event) {
-        const index = this.selectedCategories.indexOf(categoryId);
-
-        if (event && index === -1) {
-          this.selectedCategories.push(categoryId);
-        } else {
-            this.selectedCategories.splice(index, 1);
-        }
-      },
-      extractCategoryId(categoryUrl) {
-        const segments = categoryUrl.split('/');
-        return segments[segments.length - 1];
-      },
-      sortProducts(products) {
-        switch (this.selectedSort) {
-          case 'price_asc':
-            return products.slice().sort((a, b) => a.price - b.price);
-          case 'price_desc':
-            return products.slice().sort((a, b) => b.price - a.price);
-          case 'name_asc':
-            return products.slice().sort((a, b) => a.name.localeCompare(b.name));
-          case 'name_desc':
-            return products.slice().sort((a, b) => b.name.localeCompare(a.name));
-          default:
-            return products;  // retourner la liste non triée si aucun tri n'est sélectionné
-        }
-      },
-      addToCart(product) {
-        const productInCart = this.cart.find(item => item.id === product.id);
-        if (productInCart) {
-          productInCart.quantity += 1;
-        } else {
-          this.cart.push({ ...product, quantity: 1 });
-        }
-
-        this.alertMessage = `${product.name} a été ajouté au panier`;
-        this.alertVisible = true;
-      },
-      itemTotalPrice(item) {
-        return (item.price / 100) * item.quantity;
-      },
-      cartTotalPrice() {
-        return this.cart.reduce((total, item) => total + this.itemTotalPrice(item), 0).toFixed(2);
-      },
-      decrementQuantity(item) {
-        const productInCart = this.cart.find(cartItem => cartItem.id === item.id);
-
-        if (productInCart) {
-          productInCart.quantity -= 1;
-
-          if (productInCart.quantity === 0) {
-            const index = this.cart.indexOf(productInCart);
-            this.cart.splice(index, 1);
-          }
-        }
-      },
+      if (event && index === -1) {
+        this.selectedCategories.push(categoryId);
+      } else {
+          this.selectedCategories.splice(index, 1);
+      }
+      console.log(this.selectedCategories)
     },
-    computed: {
-      filteredProducts() {
-        let products = this.products.filter(product => {
-          const productPrice = product.price / 100;
-          if (productPrice < this.priceRange[0] || productPrice > this.priceRange[1]) {
-            return false;
-          }
-          
-          if (this.selectedCategories.length === 0) {
-            return true;
-          }
+    extractCategoryId(categoryUrl) {
+      const segments = categoryUrl.split('/');
+      return segments[segments.length - 1];
+    },
+    sortProducts(products) {
+      switch (this.selectedSort) {
+        case 'price_asc':
+          return products.slice().sort((a, b) => a.price - b.price);
+        case 'price_desc':
+          return products.slice().sort((a, b) => b.price - a.price);
+        case 'name_asc':
+          return products.slice().sort((a, b) => a.name.localeCompare(b.name));
+        case 'name_desc':
+          return products.slice().sort((a, b) => b.name.localeCompare(a.name));
+        default:
+          return products;  // retourner la liste non triée si aucun tri n'est sélectionné
+      }
+    },
+    addToCart(product) {
+      const productInCart = this.cart.find(item => item.id === product.id);
+      if (productInCart) {
+        productInCart.quantity += 1;
+      } else {
+        this.cart.push({ ...product, quantity: 1 });
+      }
 
-          const productCategoryIds = product.categories.map(categoryUrl =>
-            this.extractCategoryId(categoryUrl)
-          );
-          return productCategoryIds.some(categoryId =>
-            this.selectedCategories.includes(Number(categoryId))
-          );
-        });
+      this.alertMessage = `${product.name} a été ajouté au panier`;
+      this.alertVisible = true;
+    },
+    itemTotalPrice(item) {
+      return (item.price / 100) * item.quantity;
+    },
+    cartTotalPrice() {
+      return this.cart.reduce((total, item) => total + this.itemTotalPrice(item), 0).toFixed(2);
+    },
+    decrementQuantity(item) {
+      const productInCart = this.cart.find(cartItem => cartItem.id === item.id);
 
-        products = this.sortProducts(products);
-        return products;
-      },
-    }
+      if (productInCart) {
+        productInCart.quantity -= 1;
+
+        if (productInCart.quantity === 0) {
+          const index = this.cart.indexOf(productInCart);
+          this.cart.splice(index, 1);
+        }
+      }
+    },
+  },
+  computed: {
+    filteredProducts() {
+      let products = this.products.filter(product => {
+        const productPrice = product.price / 100;
+        if (productPrice < this.priceRange[0] || productPrice > this.priceRange[1]) {
+          return false;
+        }
+
+        if (this.selectedCategories.length === 0) {
+          return true;
+        }
+
+        const productCategoryIds = product.categories.map(categoryUrl =>
+          this.extractCategoryId(categoryUrl)
+        );
+        return productCategoryIds.some(categoryId =>
+          this.selectedCategories.includes(Number(categoryId))
+        );
+      });
+
+      products = this.sortProducts(products);
+      return products;
+    },
   }
-  </script>
+}
+</script>
   
