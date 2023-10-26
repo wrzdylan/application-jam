@@ -1,4 +1,8 @@
 <template>
+  <v-alert class="mb-10" v-if="error" type="error" dismissible @dismissed="error = null">
+    {{ error }}
+  </v-alert>
+
   <v-container class="fill-height" fluid>
     <v-row align="center" justify="center">
       <v-col cols="12" sm="8" md="4">
@@ -54,24 +58,26 @@ export default {
         emailRules: [
           v => !!v && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail doit être valide'
         ]
-      }
+      },
+      error: null,
     };
   },
   methods: {
     async submitForm() {
       if (this.$refs.form.validate()) {
         try {
-          const response = await axios.post('http://localhost:8080/api/users', {
+          await axios.post('http://localhost:8080/api/users', {
             email: this.formData.email,
-            // roles: ['string'],  // Assurez-vous de remplacer 'string' par la valeur appropriée
             password: this.formData.plainPassword,
-            // orders: ['path/실례.html']  // Assurez-vous de remplacer 'path/실례.html' par le chemin approprié
+          }, { 
+            headers: {
+              'Content-Type': 'application/ld+json',
+            },
           });
 
-          // Logique à exécuter après une réponse réussie
-          console.log('Réponse réussie:', response.data);
+          this.$router.push({ name: 'login' });
         } catch (error) {
-          // Gestion des erreurs lors de l'envoi de la requête
+          this.error = error.response ? error.response.data["detail"] : error.message
           console.error('Erreur:', error.response ? error.response.data : error.message);
         }
       }
