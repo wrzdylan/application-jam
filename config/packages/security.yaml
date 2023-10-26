@@ -24,6 +24,12 @@ security:
             provider: app_user_provider
             entry_point: jwt
             jwt: ~
+
+        public_api:
+            pattern: ^/api/(get/categories|get/products)
+            stateless: true
+            security: false
+
         main:
             lazy: true
             # provider set earlier inside providers
