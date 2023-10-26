@@ -17,13 +17,13 @@
                 v-model="formData.plainPassword"
                 label="Password"
                 type="password"
-                :rules="[v => !!v || 'Password is required']"
+                :rules="[v => !!v || 'Le mot de passe est requis']"
                 required
               ></v-text-field>
               <v-checkbox
                 v-model="formData.agreeTerms"
                 label="J'accepte les termes."
-                :rules="[v => !!v || 'You must agree to continue']"
+                :rules="[v => !!v || 'Vous devez accepter les termes']"
                 required
               ></v-checkbox>
               <v-btn
@@ -42,6 +42,8 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -49,16 +51,29 @@ export default {
         email: '',
         plainPassword: '',
         agreeTerms: false,
-        emailRules: [ 
-          v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail doit être valide'
+        emailRules: [
+          v => !!v && /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail doit être valide'
         ]
       }
     };
   },
   methods: {
-    submitForm() {
+    async submitForm() {
       if (this.$refs.form.validate()) {
-        // Your form submission logic here
+        try {
+          const response = await axios.post('http://localhost:8000/api/users', {
+            email: this.formData.email,
+            // roles: ['string'],  // Assurez-vous de remplacer 'string' par la valeur appropriée
+            password: this.formData.plainPassword,
+            // orders: ['path/실례.html']  // Assurez-vous de remplacer 'path/실례.html' par le chemin approprié
+          });
+
+          // Logique à exécuter après une réponse réussie
+          console.log('Réponse réussie:', response.data);
+        } catch (error) {
+          // Gestion des erreurs lors de l'envoi de la requête
+          console.error('Erreur:', error.response ? error.response.data : error.message);
+        }
       }
     }
   }
