@@ -1,9 +1,0 @@
-FROM nginx:1.25
-
-# Copier la configuration de Nginx
-COPY docker/nginx/default.conf /etc/nginx/conf.d/
-
-# Copier les fichiers construits à partir de l'étape de construction de Vue.js
-# COPY --from=build /app/dist /usr/share/nginx/html
-
-# CMD ["nginx", "-g", "daemon off;"]
