@@ -1,9 +1,24 @@
 version: '3'
 services:
+  db:
+    image: postgres:14.9
+    restart: always
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   app:
-    image: appjam
+    build: .
     ports:
       - "80:80"
+    depends_on:
+      - db
     volumes:
       - .env:/var/www/.env
       - .env.local:/var/www/.env.local
+
+volumes:
+  pgdata:
