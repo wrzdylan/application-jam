@@ -15,13 +15,23 @@ security:
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
 
-        api_docs:
-            pattern: ^/api$
+        public_area_user:
+            pattern: ^/api/users
+            methods: [ POST ]
             security: false
 
-        api_public:
-            pattern: ^/api/(products|categories|users)
-            methods: [GET, GET, POST]
+        public_area_products:
+            pattern: ^/api/products
+            methods: [ GET ]
+            security: false
+
+        public_area_categories:
+            pattern: ^/api/categories
+            methods: [ GET ]
+            security: false
+
+        api_docs:
+            pattern: ^/api$
             security: false
 
         api:
@@ -68,6 +78,7 @@ security:
     # Note: Only the *first* access control that matches will be used
 
     access_control:
+     - { path: ^/api/users, methods: [POST], roles: IS_AUTHENTICATED_ANONYMOUSLY }
      - { path: ^/admin, roles: ROLE_ADMIN }
      - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
      - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }

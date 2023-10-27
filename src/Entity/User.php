@@ -3,55 +3,44 @@
 namespace App\Entity;
 
 use AllowDynamicProperties;
-use Doctrine\ORM\Mapping as ORM;
-use App\Security\Voter\UserVoter;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
+use App\State\UserPasswordHasher;
 use Symfony\Component\Serializer\Annotation\Groups;
+
 
 
 #[AllowDynamicProperties] #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'shop_user')]
 #[UniqueEntity(fields: ['email'], message: 'Il y a déjà un compte avec ce mail.')]
 #[ApiResource(
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']],
     operations : [
-        new GetCollection(
-            // security: "is_granted('" . UserVoter::VIEW . "', object)",
-            normalizationContext: ['groups' => ['user:read', 'user:orders']],
-        ),
         new Get(
-            security: "is_granted('" . UserVoter::VIEW . "', object)",
-            normalizationContext: ['groups' => ['user:read', 'user:orders']],
+            security: "is_granted('USER_VIEW', object)",
         ),
         new Post(
-            securityPostDenormalize: "is_granted('" . UserVoter::CREATE . "', object)",
-            denormalizationContext: ['groups' => ['user:create']],
-            normalizationContext: ['groups' => ['user:read']],
-        ),
-        new Put(
-            security: "is_granted('" . UserVoter::EDIT . "', object)",
-        ),
-        new Delete(
-            security: "is_granted('" . UserVoter::DELETE . "', object)",
+            securityPostDenormalize: "is_granted('USER_CREATE', object)",
+            processor: UserPasswordHasher::class,
         ),
         new Patch(
-            security: "is_granted('" . UserVoter::EDIT . "', object)",
+            security: "is_granted('USER_EDIT', object)",
+            processor: UserPasswordHasher::class,
         ),
+
     ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
 )]
+
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -82,6 +71,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->orders = new ArrayCollection();
+        $this->roles[] = 'ROLE_USER';
     }
 
     public function getId(): ?int
