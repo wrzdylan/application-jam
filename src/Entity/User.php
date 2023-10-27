@@ -15,9 +15,8 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Patch;
+use App\State\UserPasswordHasher;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 
@@ -25,32 +24,24 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name: 'shop_user')]
 #[UniqueEntity(fields: ['email'], message: 'Il y a déjà un compte avec ce mail.')]
 #[ApiResource(
-    normalizationContext: ['groups' => ['user:read']],
-    denormalizationContext: ['groups' => ['user:write']],
     operations : [
         new GetCollection(
-            // security: "is_granted('" . UserVoter::VIEW . "', object)",
             normalizationContext: ['groups' => ['user:read', 'user:orders']],
         ),
         new Get(
             security: "is_granted('" . UserVoter::VIEW . "', object)",
-            normalizationContext: ['groups' => ['user:read', 'user:orders']],
         ),
         new Post(
             securityPostDenormalize: "is_granted('" . UserVoter::CREATE . "', object)",
-            denormalizationContext: ['groups' => ['user:create']],
-            normalizationContext: ['groups' => ['user:read']],
-        ),
-        new Put(
-            security: "is_granted('" . UserVoter::EDIT . "', object)",
-        ),
-        new Delete(
-            security: "is_granted('" . UserVoter::DELETE . "', object)",
+            processor: UserPasswordHasher::class,
         ),
         new Patch(
             security: "is_granted('" . UserVoter::EDIT . "', object)",
+            processor: UserPasswordHasher::class,
         ),
     ],
+    normalizationContext: ['groups' => ['user:read']],
+    denormalizationContext: ['groups' => ['user:write']],
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
