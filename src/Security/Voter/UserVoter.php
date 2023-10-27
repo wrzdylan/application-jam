@@ -28,12 +28,8 @@ class UserVoter extends Voter
             return true;
         }
 
-        if (!$user instanceof UserInterface) {
-            return false;  // Guests have no rights.
-        }
-
-        if (in_array('ROLE_ADMIN', $user->getRoles())) {
-            return true;  // Admin gets any single right.
+        if (in_array('ROLE_ADMIN', $user->getRoles()) || in_array('ROLE_OWNER', $user->getRoles())) {
+            return true;  // Admin and OWNER get any single right.
         }
 
         // Check if the subject is the user's account
