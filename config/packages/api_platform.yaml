@@ -1,17 +1,25 @@
 api_platform:
     swagger:
+        versions: [3]
         api_keys:
             JWT:
                 name: Authorization
                 type: header
+
     title: Jam API 3WA
     version: 1.0.0
+
+    mapping:
+        paths: ['%kernel.project_dir%/src/Entity']
+
     formats:
         jsonld: ['application/ld+json']
+
     docs_formats:
         jsonld: ['application/ld+json']
         jsonopenapi: ['application/vnd.openapi+json']
         html: ['text/html']
+
     defaults:
         stateless: true
         cache_headers:

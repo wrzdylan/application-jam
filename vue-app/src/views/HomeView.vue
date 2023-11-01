@@ -150,8 +150,8 @@ export default {
   },
   async mounted() {
     try {
-      this.categories = await this.fetchData("http://localhost:8080/api/categories");
-      this.products = await this.fetchData("http://localhost:8080/api/products");
+      this.categories = await this.fetchData("http://localhost:8000/api/categories");
+      this.products = await this.fetchData("http://localhost:8000/api/products");
       
       const priceRange = this.products.reduce((acc, product) => {
         return {

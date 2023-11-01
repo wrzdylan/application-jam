@@ -66,7 +66,7 @@ export default {
     async submitForm() {
       if (this.$refs.form.validate()) {
         try {
-          await axios.post('http://localhost:8080/api/users', {
+          await axios.post('http://localhost:8000/api/users', {
             email: this.formData.email,
             password: this.formData.plainPassword,
           }, { 
