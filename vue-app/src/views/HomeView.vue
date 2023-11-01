@@ -77,8 +77,12 @@
           </v-list>
         
           <v-divider class="my-4"></v-divider>
-        
-          Prix total du panier : {{ cartTotalPrice() }}€
+
+          <div class="d-flex justify-space-between align-center">
+            Prix total du panier : {{ cartTotalPrice() }}€
+            <!-- Bouton pour passer commande -->
+            <v-btn @click="processOrder">Passer commande</v-btn>
+          </div>
         </v-card-text>
         
       </v-card>
@@ -251,6 +255,23 @@ export default {
         }
       }
     },
+    async processOrder() {
+      try {
+        if (Object.keys(this.cart).length === 0) {
+          alert('Votre panier est vide!');
+          return;
+        }
+
+        const orderData = { cart: this.cart };
+
+        const response = await axios.post('http://localhost:8000/order', orderData);
+        console.log("RESPONSE FROM ORDER ENDPOINT : ", response)
+        // window.location.href = response.data.url;
+      } catch (error) {
+        console.error('Erreur lors de la tentative de commande:', error);
+        alert('Une erreur est survenue lors de la tentative de commande.');
+      }
+    }
   },
   computed: {
     filteredProducts() {

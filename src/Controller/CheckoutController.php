@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\Request;
 
 class CheckoutController extends AbstractController
 {
@@ -92,5 +93,65 @@ class CheckoutController extends AbstractController
         ]);
 
         return $this->redirect($session->url, 303);
+    }
+
+    #[IsGranted("ROLE_USER")]
+    #[Route('/order', name: 'order', methods: ['POST'])]
+    public function order(Request $request, EntityManagerInterface $manager, ProductRepository $productRepo): Response
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (empty($data['cart'])) {
+            return $this->json(['error' => 'Cart is empty'], 400);
+        }
+
+        $order = new Order;
+        $order->setDatetime(new DateTime);
+        $order->setStatus("PAYMENT_WAITING");
+        $total = 0;
+
+        foreach ($data['cart'] as $productId => $quantity) {
+            $product = $productRepo->find($productId);
+            if (!$product) {
+                return $this->json(['error' => "Product with id $productId not found"], 404);
+            }
+
+            $line = new LineOrder;
+            $line->setProduct($product);
+            $line->setQuantity($quantity);
+            $line->setSubtotal($quantity * $product->getPrice());
+            $total += $quantity * $product->getPrice();
+            $order->addLineOrder($line);
+        }
+
+        $order->setTotal($total);
+        $manager->persist($order);
+        $manager->flush();
+
+        \Stripe\Stripe::setApiKey($_ENV["STRIPE_API_KEY"]);
+
+        $stripeItems = [];
+        foreach ($data['cart'] as $productId => $quantity) {
+            $product = $productRepo->find($productId);
+            $stripeItems[] = [
+                'price_data' => [
+                    'currency' => 'eur',
+                    'product_data' => [
+                        'name' => $product->getName(),
+                    ],
+                    'unit_amount' => $product->getPrice(),
+                ],
+                'quantity' => $quantity,
+            ];
+        }
+
+        $stripeSession = \Stripe\Checkout\Session::create([
+            'line_items' => $stripeItems,
+            'mode' => 'payment',
+            'success_url' => 'http://localhost:8000/checkout_success/',
+            'cancel_url' => 'http://localhost:8000/checkout_error'
+        ]);
+
+        return $this->json(['url' => $stripeSession->url], 303);
     }
 }
