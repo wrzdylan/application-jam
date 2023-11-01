@@ -152,6 +152,9 @@ export default {
       error: null,
     };
   },
+  created() {
+    this.checkTokenAndRedirect();
+  },
   async mounted() {
     try {
       this.categories = await this.fetchData("http://localhost:8000/api/categories");
@@ -172,6 +175,16 @@ export default {
     }
   },
   methods: {
+    checkTokenAndRedirect()
+    {
+      const token = localStorage.getItem('token');
+      const expiration = new Date(localStorage.getItem('tokenExpiration'));
+      const now = new Date();
+      
+      if (!token || !expiration || now >= expiration) {
+        this.$router.push({ name: 'login' });
+      }
+    },
     async fetchData(url) {
       try {
         const cachedData = localStorage.getItem(url);

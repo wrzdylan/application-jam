@@ -1,39 +1,39 @@
 # Jam Project
 
-## Démarche
+## Déploiement
 
-### Initialisation de la db
-Serveur local ne peut avoir qu'une version 7.4 de php. Afin d'utiliser une version plus récente et aussi faciliter le déploiement du produit, on va encapsuler l'environnement avec Docker.
+Copier le contenu du .env :                       
+```env
+APP_ENV=dev
+APP_SECRET=fb079507c87c63668740516e586e4f00
+MESSENGER_TRANSPORT_DSN=doctrine://default?auto_setup=0
+DATABASE_URL="postgresql://user:secret@db:5432/shop?serverVersion=13&charset=utf8"
+CORS_ALLOW_ORIGIN='^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+```                              
 
-> Pour démarrer les containers : `docker-compose up --build` ou `docker-compose up -d`
+Copier le contenu du .env.local :                               
+```env
+DATABASE_URL="postgresql://user:secret@db:5432/shop?serverVersion=14&charset=utf8"
+STRIPE_API_KEY=sk_test_51NpqCfD8UxwFmlxO8vn9TUrowJwKsC469YYeOqCsBOqrFsYTVQtmMGr4tH8WsIGKxNjiHuyuvRhAZvUzLz6e1jeI00bdsFaR6J
+```              
 
-> Ouvrir terminal : `docker exec -it application-jam-db-1 bash`
+Pour lancer l'application : `docker-compose up --build -d`                              
+Pour initialiser la base de données effectuer les commandes suivantes :                             
+- `docker-compose exec api php bin/console doctrine:database:drop --force`              
+- `docker-compose exec api php bin/console doctrine:database:create`              
+- `docker-compose exec api php bin/console doctrine:migration:migrate`              
+- `docker-compose exec api php bin/console doctrine:fixtures:load`         
 
-> Pour initialiser la base de données :
-```sh
-docker-compose exec php php bin/console doctrine:database:create
-docker-compose exec php php bin/console make:migration
-docker-compose exec php php bin/console doctrine:migration:migrate
-docker-compose exec php php bin/console doctrine:fixtures:load
-```
+## Développement  
 
->Pour se connecter à la db, une fois dans le container exécuter les commandes suivantes : 
+Pour accéder au terminal d'un container docker : `docker-compose exec {nom du service} bash`         
 
-> su postgres
-
-> psql -U user -d shop
-
-> Pour display la db existante : \l
-
-> Pour display les tables : \dt
-
-Penser à changer le nom de la table user car c'est un mot réservé en postgresql. Les insert into sur user ne fonctionneront pas.
-
-### Initialisation du frontend
-- Création d'un service vue (mettre en place différent stage)            
-- Pour y accéder : `docker-compose exec vue bash`                     
-- Dans le container vue-1, instancier un nouveau projet vue avec `vue create .`               
-- Pour run l'application : `yarn serve`                  
+Pour se connecter à la base de données :                       
+- Accéder au terminal du service db              
+- `su postgres`                      
+- `psql -U user -d shop`               
+- Pour display la db existante : `\l`                
+- Pour display les tables : `\dt`       
 
 ## Description
 Projet e-commerce de confitures avec panier, espace d'administration et filtres avancés.
