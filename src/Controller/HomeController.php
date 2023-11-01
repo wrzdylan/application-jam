@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class HomeController extends AbstractController
 {
@@ -44,4 +45,14 @@ class HomeController extends AbstractController
             "maxChoice" => $maxChoice
         ]);
     }
+
+    // #[Route('/', name: 'home')]
+    // public function index(): JsonResponse
+    // {
+    //     $apiInfo = [
+    //         'message' => 'Ceci est une API. Accédez à /api pour le documentation Swagger.',
+    //     ];
+
+    //     return new JsonResponse($apiInfo);
+    // }
 }

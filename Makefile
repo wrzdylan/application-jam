@@ -7,8 +7,8 @@ drop-db:
 
 
 init-db:
+	docker-compose exec api php bin/console doctrine:database:drop --force
 	docker-compose exec api php bin/console doctrine:database:create
-	docker-compose exec api php bin/console make:migration
 	docker-compose exec api php bin/console doctrine:migration:migrate
 	docker-compose exec api php bin/console doctrine:fixtures:load
 

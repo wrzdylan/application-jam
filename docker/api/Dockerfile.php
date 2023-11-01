@@ -21,8 +21,4 @@ COPY ./ /var/www/html/
 WORKDIR /var/www/html/
 
 # Exécution des commandes pour configurer la base de données et initialiser l'application
-RUN composer install -n \
-    # && php bin/console doctrine:database:drop --no-interaction --force \
-    # && php bin/console doctrine:database:create --no-interaction \
-    # && php bin/console doctrine:migration:migrate --no-interaction \
-    # && php bin/console doctrine:fixtures:load --no-interaction
+RUN composer install -n
