@@ -17,12 +17,21 @@ DATABASE_URL="postgresql://user:secret@db:5432/shop?serverVersion=14&charset=utf
 STRIPE_API_KEY=sk_test_51NpqCfD8UxwFmlxO8vn9TUrowJwKsC469YYeOqCsBOqrFsYTVQtmMGr4tH8WsIGKxNjiHuyuvRhAZvUzLz6e1jeI00bdsFaR6J
 ```              
 
-Pour lancer l'application : `docker-compose up --build -d`                              
+Parque nous avons conservé l'ancien code, il faut effectuer les commandes suivantes :      
+- `composer install`                 
+- `npm install`                 
+                
+Pour lancer la nouvelle application : `docker-compose up --build -d`                               
 Pour initialiser la base de données effectuer les commandes suivantes :                             
 - `docker-compose exec api php bin/console doctrine:database:drop --force`              
 - `docker-compose exec api php bin/console doctrine:database:create`              
 - `docker-compose exec api php bin/console doctrine:migration:migrate`              
 - `docker-compose exec api php bin/console doctrine:fixtures:load`         
+
+Vous pourrez accéder à la nouvelle application sur : http://localhost:8080/login        
+L'ancienne application sur : http://localhost:8000/       
+L'api sur http://localhost:8000/api         
+
 
 ## Développement  
 
